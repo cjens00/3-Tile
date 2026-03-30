@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3Tile</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <h1>3Tile</h1>
+        <div class="panel">
+          <h2>Viewport</h2>
+          <div class="field">
+            <label for="viewportBackground">Background Color</label>
+            <input id="viewportBackground" type="color" value="#444444" />
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Creation</h2>
+          <div class="field">
+            <label>Active Plane</label>
+            <div class="plane-row">
+              <button id="planeXYBtn" type="button">XY</button>
+              <button id="planeYZBtn" type="button">YZ</button>
+              <button id="planeXZBtn" type="button">XZ</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="gridXYScale">Ground Grid Scale</label>
+            <div class="grid-controls">
+              <input id="gridXYScale" type="number" min="1" max="100" step="1" value="10" />
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="createLevel">Creation Level Index</label>
+            <div class="grid-controls">
+              <input id="createLevel" type="number" step="1" value="0" />
+              <button id="createLevelDown" type="button">-</button>
+              <button id="createLevelUp" type="button">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Scene</h2>
+          <div class="hud-row">Vertices: <span id="vertexCount">0</span></div>
+          <div class="hud-row">Edges: <span id="edgeCount">0</span></div>
+          <div class="hud-row">Quads: <span id="quadCount">0</span></div>
+          <div class="hud-row">Tilemaps: <span id="tilesetCount">0</span></div>
+          <div class="hud-row">Creation Plane: <span id="creationPlaneLabel">XY</span></div>
+        </div>
+      </aside>
+      <main class="viewport-wrap">
+        <canvas id="viewport"></canvas>
+        <canvas id="viewportOverlay"></canvas>
+        <div id="modeDock" class="mode-dock">
+          <button id="selectionModeBtn" class="mode-btn">Selection</button>
+          <button id="creationModeBtn" class="mode-btn">Creation</button>
+          <button id="tilePaintModeBtn" class="mode-btn">Tile Paint</button>
+          <span class="dock-sep"></span>
+          <div id="creationDockGroup" class="dock-group">
+            <button id="singleCreateBtn" class="mode-btn">Single</button>
+            <button id="boxCreateBtn" class="mode-btn">Box</button>
+          </div>
+          <div id="selectionDockGroup" class="dock-group">
+            <button id="vertexSelectBtn" class="mode-btn">Vertex (1)</button>
+            <button id="edgeSelectBtn" class="mode-btn">Edge (2)</button>
+            <button id="faceSelectBtn" class="mode-btn">Face (3)</button>
+            <button id="boxSelectBtn" class="mode-btn">Box Select</button>
+            <button id="clearSelectionBtn" class="mode-btn">Deselect</button>
+          </div>
+          <div id="paintDockGroup" class="dock-group">
+            <button id="paintFaceBtn" class="mode-btn active">Paint Face</button>
+          </div>
+        </div>
+        <div id="status" class="status">Booting renderer...</div>
+      </main>
+      <aside class="sidebar sidebar-right">
+        <h1>Materials</h1>
+        <div class="panel">
+          <h2>Tilemaps</h2>
+          <div class="field">
+            <label for="tilesetSelect">Active Tilemap</label>
+            <select id="tilesetSelect"></select>
+          </div>
+          <div class="field">
+            <label for="tilesetScale">Scale (1-100 integer)</label>
+            <div class="scale-row">
+              <input id="tilesetScale" type="number" min="1" max="100" step="1" value="1" />
+              <button id="applyTilesetScale" type="button">Apply</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tile Size (pixels)</label>
+            <div class="scale-row">
+              <input id="tileWidthPx" type="number" min="1" max="512" step="1" value="8" />
+              <div class="incdec-row">
+                <button id="tileWidthDownBtn" type="button">-</button>
+                <button id="tileWidthUpBtn" type="button">+</button>
+              </div>
+            </div>
+            <div class="scale-row">
+              <input id="tileHeightPx" type="number" min="1" max="512" step="1" value="8" />
+              <div class="incdec-row">
+                <button id="tileHeightDownBtn" type="button">-</button>
+                <button id="tileHeightUpBtn" type="button">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Padding (pixels)</label>
+            <div class="scale-row">
+              <input id="tilePaddingX" type="number" min="0" max="32" step="1" value="0" />
+              <div class="incdec-row">
+                <button id="tilePaddingXDownBtn" type="button">-</button>
+                <button id="tilePaddingXUpBtn" type="button">+</button>
+              </div>
+            </div>
+            <div class="scale-row">
+              <input id="tilePaddingY" type="number" min="0" max="32" step="1" value="0" />
+              <div class="incdec-row">
+                <button id="tilePaddingYDownBtn" type="button">-</button>
+                <button id="tilePaddingYUpBtn" type="button">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="scale-row">
+              <button id="tilemapUndockBtn" type="button">Undock Picker</button>
+              <button id="tilemapDockBtn" type="button">Dock Picker</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Preview Zoom: <span id="tilemapZoomValue">100%</span></label>
+          </div>
+          <div id="tilemapPickerHost" class="field">
+            <div id="tilemapPreviewFrame" class="tilemap-preview-frame">
+              <canvas id="tilemapPickerCanvas" width="256" height="256"></canvas>
+            </div>
+          </div>
+          <div class="field">
+            <div id="tilesetMeta" class="hint">Import a tilemap from File menu.</div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Layers</h2>
+          <div class="field">
+            <label for="layerSelect">Active Layer</label>
+            <select id="layerSelect"></select>
+          </div>
+          <div class="field">
+            <div class="plane-row">
+              <button id="layerAddBtn" type="button">+</button>
+              <button id="layerRemoveBtn" type="button">-</button>
+              <button id="layerUpBtn" type="button">Up</button>
+              <button id="layerDownBtn" type="button">Down</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="layerOpacity">Opacity</label>
+            <input id="layerOpacity" type="range" min="0" max="100" step="1" value="100" />
+            <span id="layerOpacityValue">100%</span>
+          </div>
+          <div class="field">
+            <label><input id="layerVisible" type="checkbox" checked /> Visible</label>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div id="preferencesModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-left">
+          <button id="prefHotkeys" class="pref-nav active">Hotkeys</button>
+          <button id="prefViewport" class="pref-nav">Viewport</button>
+          <button id="prefGeometry" class="pref-nav">Geometry</button>
+          <button id="prefTilemaps" class="pref-nav">Tilemaps</button>
+        </div>
+        <div class="modal-right">
+          <h2 id="prefTitle">Hotkeys</h2>
+          <div id="prefContent"></div>
+          <div class="modal-actions">
+            <button id="prefClose">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/renderer/main.ts"></script>
+  </body>
+</html>
